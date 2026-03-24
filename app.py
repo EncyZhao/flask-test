@@ -204,7 +204,7 @@ def get_summary():
 
         if summary["total_orders"] > 0:
             summary["overall_progress"] = round(
-                summary["total_completed"] / summary["total_orders"] * 100, 1
+                summary["total_completed"] / summary["total_quantity"] * 100, 1
             )
 
         return jsonify({"success": True, "data": summary})
