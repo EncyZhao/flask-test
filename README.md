@@ -23,3 +23,8 @@ python app.py
 `
 代码中存在SQL注入风险、数据表未单独封装映射增加代码维护难度等问题
 `
+
+## 仓库地址
+`
+https://github.com/EncyZhao/flask-test
+`
