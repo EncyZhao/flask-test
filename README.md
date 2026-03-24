@@ -15,7 +15,7 @@ conda activate fast-test
 pip install flask
 `
 
-##运行app.py文件
+## 运行app.py文件
 `
 python app.py
 `
