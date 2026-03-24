@@ -74,7 +74,7 @@ def format_order(row):
         "product_name": row["product_name"],
         "quantity": row["quantity"],
         "completed": row["completed"],
-        "progress": calculate_progress(row["quantity"], row["completed"]),
+        "progress": 0 if not row["quantity"] else calculate_progress(row["completed"], row["quantity"]), # fix: 优化总计划件数为0的误设情况，修复数据参数位置错误
         "status": row["status"],
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
@@ -95,7 +95,7 @@ def get_orders():
     try:
         if status_filter:
             rows = conn.execute(
-                f"SELECT * FROM work_orders WHERE status = {status_filter}"
+                f"SELECT * FROM work_orders WHERE status = '{status_filter}'" # fix: sql中的字符串查询，需要用引号包裹
             ).fetchall()
         else:
             rows = conn.execute("SELECT * FROM work_orders").fetchall()
@@ -266,6 +266,15 @@ def index():
         </thead>
         <tbody id="ordersBody">
             <tr><td colspan="7" style="text-align:center;color:#999">加载中...</td></tr>
+            <div style="margin-bottom:16px;">
+            <label style="margin-right:8px;">筛选状态：</label>
+            <select id="statusFilter" onchange="loadOrders()">
+                <option value="">全部</option>
+                <option value="pending">待生产</option>
+                <option value="in_progress">生产中</option>
+                <option value="completed">已完成</option>
+            </select>
+        </div>
         </tbody>
     </table>
 </div>
@@ -296,7 +305,10 @@ def index():
     }
 
     async function loadOrders() {
-        const res = await fetch('/api/orders');
+        const status = document.getElementById('statusFilter')?.value || '';
+        const url = status ? `/api/orders?status=${status}` : '/api/orders';
+        const res = await fetch(url);
+
         const json = await res.json();
         if (!json.success) return;
         const tbody = document.getElementById('ordersBody');
@@ -309,7 +321,7 @@ def index():
                 <td>${o.completed}</td>
                 <td>
                     <div class="progress-bar-wrap">
-                        <div class="progress-bar" style="width: " + o.progress + "%"></div>
+                        <div class="progress-bar" style="width: ${o.progress}%"></div>
                     </div>
                     <span style="margin-left:6px">${o.progress}%</span>
                 </td>
